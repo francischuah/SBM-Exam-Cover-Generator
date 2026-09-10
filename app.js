@@ -165,7 +165,7 @@ function showProgrammeOptions(programme) {
           data-template="odl-essay"
         >
           <strong>Essay / Structured</strong>
-          <span>ODL examination paper with essay or structured questions</span>
+          <span>Examination paper with essay or structured questions</span>
         </button>
 
         <button
@@ -174,7 +174,7 @@ function showProgrammeOptions(programme) {
           data-template="odl-mcq"
         >
           <strong>Multiple Choice Questions</strong>
-          <span>ODL examination paper using objective questions</span>
+          <span>Examination paper using objective questions</span>
         </button>
 
       </div>
