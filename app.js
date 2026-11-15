@@ -1303,6 +1303,30 @@ if (isBilingual) {
 }
 }
 
+// Separate bilingual values allow Word to italicise only English runs.
+// Legacy DATE_DAY and TIME_DURATION remain available for other templates.
+const dateObject = new Date(examDate + "T00:00:00");
+const malayDayForCover = new Intl.DateTimeFormat("ms-MY", { weekday: "long" })
+  .format(dateObject).toUpperCase();
+const englishDayForCover = new Intl.DateTimeFormat("en-MY", { weekday: "long" })
+  .format(dateObject).toUpperCase();
+const bilingualCover = isBilingual && selectedProgramme === "conventional";
+const dayBM = bilingualCover ? malayDayForCover : "";
+const dayEN = bilingualCover ? englishDayForCover : "";
+const dateBM = bilingualCover ? formatDateForMalayDocument(examDate) : "";
+const dateEN = bilingualCover ? formatDateWithOrdinalEnglish(examDate) : "";
+const durationBM = bilingualCover ? createMalayDuration(startTime, endTime) : "";
+const durationEN = bilingualCover ? duration : "";
+const timeRange = bilingualCover
+  ? formatOfficialExamTime(startTime) + " – " + formatOfficialExamTime(endTime)
+  : "";
+
+if (bilingualCover) {
+  // Existing placeholders still work; new split placeholders enable mixed italics.
+  dateDayText = dateBM + " / " + dateEN;
+  timeDurationText = timeRange + " (" + durationBM + " / " + durationEN + ")";
+}
+
 doc.render({
 
   COURSE_CODE:
@@ -1319,6 +1343,14 @@ doc.render({
 
   DATE_DAY:
     dateDayText,
+
+  DATE_BM: dateBM,
+  DATE_EN: dateEN,
+  DAY_BM: dayBM,
+  DAY_EN: dayEN,
+  TIME_RANGE: timeRange,
+  DURATION_BM: durationBM,
+  DURATION_EN: durationEN,
 
   TIME_DURATION:
     timeDurationText,
@@ -2488,3 +2520,24 @@ function showStatisticsFields(
 
 populateStatisticsOptions();
 
+
+// Academic Affairs bilingual cover date/time formatting.
+function formatDateWithOrdinalEnglish(dateValue) {
+  if (!dateValue) return "";
+  const date = new Date(dateValue + "T00:00:00");
+  const day = date.getDate();
+  const suffix = (day % 100 >= 11 && day % 100 <= 13)
+    ? "TH"
+    : ({ 1: "ST", 2: "ND", 3: "RD" }[day % 10] || "TH");
+  const month = new Intl.DateTimeFormat("en-GB", { month: "long" })
+    .format(date).toUpperCase();
+  return `${day}${suffix} ${month} ${date.getFullYear()}`;
+}
+
+function formatOfficialExamTime(timeValue) {
+  if (!timeValue) return "";
+  const [hours, minutes] = timeValue.split(":").map(Number);
+  const hour12 = hours % 12 || 12;
+  const period = hours >= 12 ? "P.M" : "A.M";
+  return `${hour12}.${String(minutes).padStart(2, "0")} ${period}`;
+}
